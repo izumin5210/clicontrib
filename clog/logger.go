@@ -16,9 +16,24 @@ func init() {
 	initialize(logModeNop)
 }
 
-func initialize(m logMode) {
-	logger = create(m).WithOptions(zap.AddCallerSkip(1))
+// Set sets the logger used in application globa.
+func Set(l *zap.Logger) {
+	logger = l
 	sLogger = logger.Sugar()
+}
+
+// InitDebug initialize the logger in debug mode.
+func InitDebug() {
+	initialize(logModeDebug)
+}
+
+// InitVerbose initialize the logger in verbose mode.
+func InitVerbose() {
+	initialize(logModeVerbose)
+}
+
+func initialize(m logMode) {
+	Set(create(m).WithOptions(zap.AddCallerSkip(1)))
 }
 
 func create(m logMode) (l *zap.Logger) {
