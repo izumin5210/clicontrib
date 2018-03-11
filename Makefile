@@ -1,10 +1,5 @@
 .DEFAULT_GOAL := all
 
-VERSION_MAJOR ?= 0
-VERSION_MINOR ?= 1
-VERSION_BUILD ?= 2
-VERSION ?= v$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_BUILD)
-
 ORG := github.com/izumin5210
 PROJECT := clicontrib
 ROOT_PKG ?= $(ORG)/$(PROJECT)
@@ -47,15 +42,16 @@ GENERATED_BINS :=
 PACKAGES :=
 CMDS := $(wildcard ./cmd/*)
 
+LDFLAGS_CMD = ./bin/cliutils --config cliutils-$1.toml ldflags
+
 define cmd-tmpl
 $(eval NAME := $(notdir $(1)))
 $(eval OUT := $(addprefix $(BIN_DIR),$(NAME)))
-$(eval LDFLAGS := -ldflags "$(shell ./bin/cliutils ldflags $(NAME) $(VERSION))")
 $(eval GENERATED_BINS += $(OUT))
 $(OUT): $(SRC_FILES)
 	$(call section,Building $(OUT))
-	@go build $(GO_BUILD_FLAGS) $(LDFLAGS) -o $(OUT) $(1)
-	@go build $(GO_BUILD_FLAGS) $(LDFLAGS) -o $(OUT) $(1)
+	go build $(GO_BUILD_FLAGS) -o $(OUT) $(1)
+	go build $(GO_BUILD_FLAGS) -ldflags "$$$$($(call LDFLAGS_CMD,$(NAME)))" -o $(OUT) $(1)
 
 .PHONY: $(NAME)
 $(NAME): $(OUT)
@@ -65,7 +61,7 @@ $(eval PACKAGES += $(NAME)-package)
 .PHONY: $(NAME)-package
 $(NAME)-package: $(NAME)
 	@PATH=$(shell pwd)/$(DEP_BIN_DIR):$$$$PATH gox \
-		$(LDFLAGS) \
+		-ldflags="$$$$($(call LDFLAGS_CMD,$(NAME)))" \
 		-os="$(XC_OS)" \
 		-arch="$(XC_ARCH)" \
 		-output="$(OUT_DIR)/$(NAME)_{{.OS}}_{{.Arch}}" \
