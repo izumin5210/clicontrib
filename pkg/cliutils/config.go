@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Config stores general setting params and provides accessors for them.
 type Config struct {
 	cfgFile   string
 	v         *viper.Viper
@@ -16,6 +17,7 @@ type Config struct {
 	data      map[string]interface{}
 }
 
+// NewConfig creates new Config object.
 func NewConfig(
 	inReader io.Reader,
 	outWriter io.Writer,
@@ -29,6 +31,7 @@ func NewConfig(
 	}
 }
 
+// Init initializes the config read from the file.
 func (c *Config) Init(cfgFile string) (err error) {
 	c.cfgFile = cfgFile
 	c.v.SetConfigFile(c.cfgFile)
@@ -40,11 +43,13 @@ func (c *Config) Init(cfgFile string) (err error) {
 	return
 }
 
+// Name returns the application name.
 func (c *Config) Name() (string, error) {
 	v, err := c.templateValue("name")
 	return v, errors.WithStack(err)
 }
 
+// Version returns the application version.
 func (c *Config) Version() (string, error) {
 	v, err := c.templateValue("version")
 	return v, errors.WithStack(err)
