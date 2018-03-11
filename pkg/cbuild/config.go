@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	packageName = "github.com/izumin5210/clicontrib/cbuild"
+	packageName = "github.com/izumin5210/clicontrib/pkg/cbuild"
 )
 
 var (

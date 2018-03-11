@@ -39,6 +39,7 @@ func NewClicontribCommand(
 
 	cmd.AddCommand(
 		newLdflagsCommand(cfg),
+		ccmd.NewVersionCommand(),
 	)
 
 	return cmd
