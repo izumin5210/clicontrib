@@ -1,0 +1,66 @@
+language: go
+
+go: "1.10"
+
+env:
+  global:
+  - DEP_VERSION="0.4.1"
+  - FILE_TO_DEPLOY="dist/*"
+  - CANARY_TAG="canary"
+
+  # GITHUB_TOKEN
+  - secure: "wQEUD8jO5xMrKu/XGJXA3UEwgYds3WM2O0lzUc+X0+ppY0Jk6zn0yIU08kvo8vqKjenSA7wrRztMwxvROXulGLHcskx9E5mC3yrLLxxYIkoWQuQUlSuQJuMqDtXo8bvjlka4kz8WBqMMWdyDvMwj5MkfDRgJUsxXDSXxWpwvc6br7teLD60DLTHyQ5kiH21bQ/yE2PlfrIi0lNFo/YvLio3MpdpXOrhFQkzw2/ex+uztYSb3/f4acSTrohAfqjr1U2C/0KI5X98smR0Y/cdsViJgb/09rwaOnm8yZJoOCYrXZQyPh3J75810TygtRaFBIdAOqXDZIe4j9zKBRgF2OS4HTVRCxDYrXIiWlMWs6mXSaQJql/KTQN8lqX340D73bISX43AEPgWkG8zB5tHC3+2oHLfuukU0Jg8fszL/APoUb3NzC+2JmunpYD+C7QyCqbA903aYkatcBfFgYQaiL1/JMi76p7+fT08PSPnT5Z/F4ITLWx0ThGpSmE1Z0230HjqzcCYkZcy9yE1tBTLDJd+2dTidgE1n9zsVV7dEaNX7TEui0svCYvWgiKM7IsntY1s5qqDtZnzgKlAMGbltqg7qNjIb25Shfl3EEg/sYJ+9jrHCC0mKj9jBx/vCGiN+5MkYYbDsQtZxISmVKNPfPGYnjq50d1rbORcNfI4Sgzs="
+
+branches:
+  except:
+  - canary
+
+cache:
+  directories:
+  - vendor
+  - $GOPATH/pkg/dep
+
+before_install:
+- curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o $GOPATH/bin/dep
+- chmod +x $GOPATH/bin/dep
+- go get -u github.com/golang/lint/golint
+- export PATH=$PWD/bin:$PATH
+
+install:
+- make setup
+
+script:
+- make lint
+- make cover
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+
+before_deploy:
+- make packages
+# for canary build, ref: https://github.com/oliexdev/openScale/pull/121
+- git remote add gh https://${TRAVIS_REPO_SLUG%/*}:${GITHUB_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git
+- git tag -f $CANARY_TAG
+- git push -f gh $CANARY_TAG
+- git remote remove gh
+
+deploy:
+- provider: releases
+  skip_cleanup: true
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file: $FILE_TO_DEPLOY
+  on:
+    tags: true
+- provider: releases
+  skip_cleanup: true
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file: $FILE_TO_DEPLOY
+  prerelease: true
+  overwrite: true
+  name: canary
+  body: canary build of $TRAVIS_BRANCH ($TRAVIS_COMMIT) built by Travis CI on $(date +'%F %T %Z').
+  target_commitish: $TRAVIS_COMMIT
+  on:
+    branch: master
