@@ -18,7 +18,7 @@ func NewVersionCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, _ []string) {
 			cfg := cbuild.Default
 			releaseType := "stable"
-			if cfg.GitTag != cfg.GitNearestTag {
+			if cfg.GitTag != cfg.GitNearestTag || cfg.GitNearestTag == "" {
 				releaseType = "canary"
 			}
 			fmtStr := "%s %s %s (%s %s)\n"
