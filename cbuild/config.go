@@ -72,7 +72,9 @@ func (c *Config) Ldflags() string {
 	result := make([]string, 0, len(ldflags))
 
 	for k, v := range ldflags {
-		result = append(result, "-X "+packageName+"."+k+"="+v)
+		if v != "" {
+			result = append(result, "-X "+packageName+"."+k+"="+v)
+		}
 	}
 
 	return strings.Join(result, " ")
