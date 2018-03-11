@@ -33,7 +33,7 @@ var (
 	gitTag         string
 	gitNearestTag  string
 	gitTreeState   string
-	buildTimestamp int64
+	buildTimestamp string
 )
 
 func defaultConfig() Config {
@@ -42,6 +42,10 @@ func defaultConfig() Config {
 	if err != nil {
 		state = TreeStateDirty
 	}
+	st, err := strconv.Atoi(buildTimestamp)
+	if err != nil {
+		st = 0
+	}
 	return Config{
 		Name:          name,
 		Version:       version,
@@ -49,7 +53,7 @@ func defaultConfig() Config {
 		GitTag:        gitTag,
 		GitNearestTag: gitNearestTag,
 		GitTreeState:  state,
-		BuildTime:     time.Unix(buildTimestamp, 0),
+		BuildTime:     time.Unix(int64(st), 0),
 	}
 }
 
