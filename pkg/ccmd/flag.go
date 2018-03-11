@@ -1,9 +1,9 @@
-package clicontrib
+package ccmd
 
 import (
 	"fmt"
 
-	"github.com/izumin5210/clicontrib/clog"
+	"github.com/izumin5210/clicontrib/pkg/clog"
 	"github.com/spf13/cobra"
 )
 
