@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/izumin5210/clicontrib/cbuild"
+	"github.com/izumin5210/clicontrib/pkg/cbuild"
 	"github.com/izumin5210/clicontrib/pkg/cliutils"
 )
 

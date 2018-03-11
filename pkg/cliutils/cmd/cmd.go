@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/izumin5210/clicontrib"
-	"github.com/izumin5210/clicontrib/cbuild"
+	"github.com/izumin5210/clicontrib/pkg/cbuild"
+	"github.com/izumin5210/clicontrib/pkg/ccmd"
 	"github.com/izumin5210/clicontrib/pkg/cliutils"
 )
 
@@ -33,12 +33,13 @@ func NewClicontribCommand(
 
 	var cfgFile string
 	cobra.OnInitialize(func() { cfg.Init(cfgFile) })
-	clicontrib.HandleLogFlags(cmd)
+	ccmd.HandleLogFlags(cmd)
 
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "./"+cbuild.Default.Name+".toml", "config file")
 
 	cmd.AddCommand(
 		newLdflagsCommand(cfg),
+		ccmd.NewVersionCommand(),
 	)
 
 	return cmd
