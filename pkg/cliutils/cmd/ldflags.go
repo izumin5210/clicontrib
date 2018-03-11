@@ -2,16 +2,16 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"os/exec"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/izumin5210/clicontrib/cbuild"
+	"github.com/izumin5210/clicontrib/pkg/cliutils"
 )
 
-func newLdflagsCommand(outWriter io.Writer, errWriter io.Writer) *cobra.Command {
+func newLdflagsCommand(cfg *cliutils.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           "ldflags NAME VERSION",
 		Short:         "",
@@ -19,51 +19,59 @@ func newLdflagsCommand(outWriter io.Writer, errWriter io.Writer) *cobra.Command 
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		RunE: func(_ *cobra.Command, args []string) error {
-			cfg := cbuild.Config{}
-
-			cfg.Name = args[0]
-			cfg.Version = args[1]
+			buildCfg := cbuild.Config{}
 
 			var (
+				cmd *exec.Cmd
 				out []byte
 				err error
 			)
 
-			cmd := exec.Command("git", "rev-parse", "HEAD")
-			cmd.Stderr = errWriter
+			buildCfg.Name, err = cfg.Name()
+			if err != nil {
+				return err
+			}
+
+			buildCfg.Version, err = cfg.Version()
+			if err != nil {
+				return err
+			}
+
+			cmd = exec.Command("git", "rev-parse", "HEAD")
+			cmd.Stderr = cfg.ErrWriter
 			out, err = cmd.Output()
 			if err != nil {
 				return err
 			}
-			cfg.GitCommit = string(out)
+			buildCfg.GitCommit = string(out)
 
 			cmd = exec.Command("git", "describe", "--exact-match", "--abbrev=0", "--tags")
 			out, err = cmd.Output()
 			if err == nil {
-				cfg.GitTag = string(out)
+				buildCfg.GitTag = string(out)
 			}
 
 			cmd = exec.Command("git", "describe", "--abbrev=0", "--tags")
 			out, err = cmd.Output()
 			if err == nil {
-				cfg.GitNearestTag = string(out)
+				buildCfg.GitNearestTag = string(out)
 			}
 
 			cmd = exec.Command("git", "status", "--porcelain")
-			cmd.Stderr = errWriter
+			cmd.Stderr = cfg.ErrWriter
 			out, err = cmd.Output()
 			if err != nil {
 				return err
 			}
 			if len(out) == 0 {
-				cfg.GitTreeState = cbuild.TreeStateClean
+				buildCfg.GitTreeState = cbuild.TreeStateClean
 			} else {
-				cfg.GitTreeState = cbuild.TreeStateDirty
+				buildCfg.GitTreeState = cbuild.TreeStateDirty
 			}
 
-			cfg.BuildTime = time.Now().UTC()
+			buildCfg.BuildTime = time.Now().UTC()
 
-			fmt.Fprintln(outWriter, cfg.Ldflags())
+			fmt.Fprintln(cfg.OutWriter, buildCfg.Ldflags())
 
 			return nil
 		},
