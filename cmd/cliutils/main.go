@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/izumin5210/clicontrib/pkg/clicontrib/cmd"
+	"github.com/izumin5210/clicontrib/pkg/cliutils/cmd"
 )
 
 var (

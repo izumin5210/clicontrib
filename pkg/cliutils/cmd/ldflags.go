@@ -6,8 +6,9 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/izumin5210/clicontrib/cbuild"
 	"github.com/spf13/cobra"
+
+	"github.com/izumin5210/clicontrib/cbuild"
 )
 
 func newLdflagsCommand(outWriter io.Writer, errWriter io.Writer) *cobra.Command {
